@@ -95,8 +95,41 @@ static struct s3c2410_uartcfg smdkv210_uartcfgs[] __initdata = {
 	},
 };
 
-static struct platform_device *smdkv210_devices[] __initdata = {
+static struct resource smdkv210_dm9000_resources[] = {
+	[0] = {
+		.start	= S5PV210_PA_SROM_BANK1 + 0x300,
+		.end	= S5PV210_PA_SROM_BANK1 + 0x300,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		.start	= S5PV210_PA_SROM_BANK1 + 0x300 + 4,
+		.end	= S5PV210_PA_SROM_BANK1 + 0x300 + 4,
+		.flags	= IORESOURCE_MEM,
+	},
+	[2] = {
+		.start	= IRQ_EINT(10),
+		.end	= IRQ_EINT(10),
+		.flags	= IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL,
+	},
+};
 
+static struct dm9000_plat_data smdkv210_dm9000_platdata = {
+	.flags		= DM9000_PLATF_16BITONLY | DM9000_PLATF_NO_EEPROM,
+	.dev_addr	= { 0x00, 0x09, 0xc0, 0xff, 0xec, 0x48 },
+};
+
+static struct platform_device smdkv210_dm9000 = {
+	.name		= "dm9000",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(smdkv210_dm9000_resources),
+	.resource	= smdkv210_dm9000_resources,
+	.dev		= {
+		.platform_data	= &smdkv210_dm9000_platdata,
+	},
+};
+
+static struct platform_device *smdkv210_devices[] __initdata = {
+	&smdkv210_dm9000,
 };
 
 static void __init smdkv210_map_io(void)
@@ -112,8 +145,27 @@ static void __init smdkv210_reserve(void)
 	s5p_mfc_reserve_mem(0x43000000, 8 << 20, 0x51000000, 8 << 20);
 }
 
+static void __init smdkv210_dm9000_init(void)
+{
+	unsigned int tmp;
+
+	gpio_request(S5PV210_MP01(1), "nCS1");
+	s3c_gpio_cfgpin(S5PV210_MP01(1), S3C_GPIO_SFN(2));
+	gpio_free(S5PV210_MP01(1));
+
+	tmp = (5 << S5P_SROM_BCX__TACC__SHIFT);
+	__raw_writel(tmp, S5P_SROM_BC1);
+
+	tmp = __raw_readl(S5P_SROM_BW);
+	tmp &= (S5P_SROM_BW__CS_MASK << S5P_SROM_BW__NCS1__SHIFT);
+	tmp |= (1 << S5P_SROM_BW__NCS1__SHIFT);
+	__raw_writel(tmp, S5P_SROM_BW);
+}
+
 static void __init smdkv210_machine_init(void)
 {
+	smdkv210_dm9000_init();
+	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
 
