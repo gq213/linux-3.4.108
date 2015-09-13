@@ -148,6 +148,8 @@ config MACH_SMDKV210
 	select S5PV210_SETUP_SDHCI
 	select S3C_DEV_I2C1
 	select S5PV210_SETUP_I2C1
+	select S5PV210_SETUP_USB_PHY
+	select S5P_DEV_USB_EHCI
 	help
 	  Machine support for Samsung SMDKV210
 

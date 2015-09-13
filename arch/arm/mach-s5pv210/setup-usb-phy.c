@@ -73,10 +73,93 @@ static int s5pv210_usb_otgphy_exit(struct platform_device *pdev)
 	return 0;
 }
 
+static atomic_t host_usage;
+static int exynos4210_usb_phy1_init(struct platform_device *pdev)
+{
+	struct clk *otg_clk;
+	int err;
+
+	dev_err(&pdev->dev, "usb_phy1_init\n");
+
+	atomic_inc(&host_usage);
+
+	otg_clk = clk_get(&pdev->dev, "otg");
+	if (IS_ERR(otg_clk)) {
+		dev_err(&pdev->dev, "Failed to get otg clock\n");
+		return PTR_ERR(otg_clk);
+	}
+
+	err = clk_enable(otg_clk);
+	if (err) {
+		clk_put(otg_clk);
+		return err;
+	}
+
+	if (readl(S5PV210_USB_PHY_CON) & (0x1<<1)) {
+		clk_disable(otg_clk);
+		clk_put(otg_clk);
+		return 0;
+	}
+
+	writel(readl(S5PV210_USB_PHY_CON) | (0x1<<1),
+		     S5PV210_USB_PHY_CON);
+	writel((readl(S3C_PHYPWR)
+		      & ~(0x1<<7) & ~(0x1<<6)) | (0x1<<8) | (0x1<<5),
+		     S3C_PHYPWR);
+	writel((readl(S3C_PHYCLK) & ~(0x1<<7)) | (0x3<<0),
+		     S3C_PHYCLK);
+	writel((readl(S3C_RSTCON)) | (0x1<<4) | (0x1<<3),
+		     S3C_RSTCON);
+	writel(readl(S3C_RSTCON) & ~(0x1<<4) & ~(0x1<<3),
+		     S3C_RSTCON);
+	/* "at least 10uS" for PHY reset elsewhere, 20 not enough here... */
+	udelay(80);
+
+	clk_disable(otg_clk);
+	clk_put(otg_clk);
+
+	return 0;
+}
+
+static int exynos4210_usb_phy1_exit(struct platform_device *pdev)
+{
+	struct clk *otg_clk;
+	int err;
+
+	dev_err(&pdev->dev, "usb_phy1_exit\n");
+
+	if (atomic_dec_return(&host_usage) > 0)
+		return 0;
+
+	otg_clk = clk_get(&pdev->dev, "otg");
+	if (IS_ERR(otg_clk)) {
+		dev_err(&pdev->dev, "Failed to get otg clock\n");
+		return PTR_ERR(otg_clk);
+	}
+
+	err = clk_enable(otg_clk);
+	if (err) {
+		clk_put(otg_clk);
+		return err;
+	}
+
+	writel(readl(S3C_PHYPWR) | (0x1<<7)|(0x1<<6),
+		     S3C_PHYPWR);
+	writel(readl(S5PV210_USB_PHY_CON) & ~(1<<1),
+		     S5PV210_USB_PHY_CON);
+
+	clk_disable(otg_clk);
+	clk_put(otg_clk);
+
+	return 0;
+}
+
 int s5p_usb_phy_init(struct platform_device *pdev, int type)
 {
 	if (type == S5P_USB_PHY_DEVICE)
 		return s5pv210_usb_otgphy_init(pdev);
+	else if (type == S5P_USB_PHY_HOST)
+		return exynos4210_usb_phy1_init(pdev);
 
 	return -EINVAL;
 }
@@ -85,6 +168,8 @@ int s5p_usb_phy_exit(struct platform_device *pdev, int type)
 {
 	if (type == S5P_USB_PHY_DEVICE)
 		return s5pv210_usb_otgphy_exit(pdev);
+	else if (type == S5P_USB_PHY_HOST)
+		return exynos4210_usb_phy1_exit(pdev);
 
 	return -EINVAL;
 }

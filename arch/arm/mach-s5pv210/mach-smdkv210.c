@@ -51,6 +51,7 @@
 #include <plat/regs-fb-v4.h>
 #include <plat/mfc.h>
 #include <plat/sdhci.h>
+#include <plat/ehci.h>
 
 #include "common.h"
 
@@ -228,6 +229,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&s3c_device_i2c0,
 	&s3c_device_gpio_button,
 	&tq210_device_led,
+	&s5p_device_ehci,
 };
 
 static void __init smdkv210_map_io(void)
@@ -269,6 +271,8 @@ static struct i2c_board_info smdkv210_i2c_devs0[] __initdata = {
 	{ I2C_BOARD_INFO("24c02", 0x50), },
 };
 
+static struct s5p_ehci_platdata smdkv210_ehci_pdata;
+
 static void __init smdkv210_machine_init(void)
 {
 	smdkv210_dm9000_init();
@@ -276,6 +280,7 @@ static void __init smdkv210_machine_init(void)
 	s3c_i2c0_set_platdata(NULL);
 	i2c_register_board_info(0, smdkv210_i2c_devs0,
 			ARRAY_SIZE(smdkv210_i2c_devs0));
+	s5p_ehci_set_platdata(&smdkv210_ehci_pdata);
 	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
