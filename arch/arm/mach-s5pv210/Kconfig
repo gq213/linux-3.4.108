@@ -146,6 +146,8 @@ config MACH_SMDKV210
 	select S5P_DEV_MFC
 	select S3C_DEV_HSMMC
 	select S5PV210_SETUP_SDHCI
+	select S3C_DEV_I2C1
+	select S5PV210_SETUP_I2C1
 	help
 	  Machine support for Samsung SMDKV210
 

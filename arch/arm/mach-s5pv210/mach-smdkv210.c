@@ -132,6 +132,7 @@ static struct platform_device smdkv210_dm9000 = {
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
+	&s3c_device_i2c0,
 };
 
 static void __init smdkv210_map_io(void)
@@ -169,10 +170,17 @@ static struct s3c_sdhci_platdata smdkv210_hsmmc0_data __initdata = {
 	.cd_type		= S3C_SDHCI_CD_INTERNAL,
 };
 
+static struct i2c_board_info smdkv210_i2c_devs0[] __initdata = {
+	{ I2C_BOARD_INFO("24c02", 0x50), },
+};
+
 static void __init smdkv210_machine_init(void)
 {
 	smdkv210_dm9000_init();
 	s3c_sdhci0_set_platdata(&smdkv210_hsmmc0_data);
+	s3c_i2c0_set_platdata(NULL);
+	i2c_register_board_info(0, smdkv210_i2c_devs0,
+			ARRAY_SIZE(smdkv210_i2c_devs0));
 	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
