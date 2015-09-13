@@ -144,6 +144,8 @@ config MACH_SMDKV210
 	bool "SMDKV210"
 	select CPU_S5PV210
 	select S5P_DEV_MFC
+	select S3C_DEV_HSMMC
+	select S5PV210_SETUP_SDHCI
 	help
 	  Machine support for Samsung SMDKV210
 

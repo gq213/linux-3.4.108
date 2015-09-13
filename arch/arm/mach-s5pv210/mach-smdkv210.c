@@ -47,6 +47,7 @@
 #include <plat/backlight.h>
 #include <plat/regs-fb-v4.h>
 #include <plat/mfc.h>
+#include <plat/sdhci.h>
 
 #include "common.h"
 
@@ -130,6 +131,7 @@ static struct platform_device smdkv210_dm9000 = {
 
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
+	&s3c_device_hsmmc0,
 };
 
 static void __init smdkv210_map_io(void)
@@ -162,9 +164,15 @@ static void __init smdkv210_dm9000_init(void)
 	__raw_writel(tmp, S5P_SROM_BW);
 }
 
+static struct s3c_sdhci_platdata smdkv210_hsmmc0_data __initdata = {
+	.max_width		= 4,
+	.cd_type		= S3C_SDHCI_CD_INTERNAL,
+};
+
 static void __init smdkv210_machine_init(void)
 {
 	smdkv210_dm9000_init();
+	s3c_sdhci0_set_platdata(&smdkv210_hsmmc0_data);
 	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
