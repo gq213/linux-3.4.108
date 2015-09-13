@@ -21,6 +21,7 @@
 #include <linux/pwm_backlight.h>
 #include <linux/input.h>
 #include <linux/gpio_keys.h>
+#include <linux/leds.h>
 
 #include <asm/hardware/vic.h>
 #include <asm/mach/arch.h>
@@ -193,11 +194,40 @@ static struct platform_device s3c_device_gpio_button = {
 	}
 };
 
+static struct gpio_led tq210_leds[] = {
+	[0] = {
+		.name			= "led1",
+		.default_trigger	= "heartbeat",
+		.gpio			= S5PV210_GPC0(3),
+		.active_low		= 0,
+		.default_state	= LEDS_GPIO_DEFSTATE_OFF,
+	},
+	[1] = {
+		.name			= "led2",
+		.default_trigger	= "timer",
+		.gpio			= S5PV210_GPC0(4),
+		.active_low		= 0,
+		.default_state	= LEDS_GPIO_DEFSTATE_OFF,
+	},
+};
+static struct gpio_led_platform_data tq210_gpio_led_data = {
+	.leds		= tq210_leds,
+	.num_leds	= ARRAY_SIZE(tq210_leds),
+};
+static struct platform_device tq210_device_led= {
+       .name	= "leds-gpio",
+       .id		= -1,
+       .dev		= {
+		.platform_data = &tq210_gpio_led_data,
+       },
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
 	&s3c_device_i2c0,
 	&s3c_device_gpio_button,
+	&tq210_device_led,
 };
 
 static void __init smdkv210_map_io(void)
