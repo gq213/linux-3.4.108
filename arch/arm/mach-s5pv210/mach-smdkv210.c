@@ -245,6 +245,28 @@ static struct platform_device smdkv210_ds18b20_device = {
         },
 };
 
+static void smdkv210_lte480wv_set_power(struct plat_lcd_data *pd,
+					unsigned int power)
+{
+	if (power) {
+		gpio_request_one(S5PV210_GPD0(0), GPIOF_OUT_INIT_HIGH, "GPD0");
+		gpio_free(S5PV210_GPD0(0));
+	} else {
+		gpio_request_one(S5PV210_GPD0(0), GPIOF_OUT_INIT_LOW, "GPD0");
+		gpio_free(S5PV210_GPD0(0));
+	}
+}
+
+static struct plat_lcd_data smdkv210_lcd_lte480wv_data = {
+	.set_power	= smdkv210_lte480wv_set_power,
+};
+
+static struct platform_device smdkv210_lcd_lte480wv = {
+	.name			= "platform-lcd",
+	.dev.parent		= &s3c_device_fb.dev,
+	.dev.platform_data	= &smdkv210_lcd_lte480wv_data,
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
@@ -253,6 +275,8 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&tq210_device_led,
 	&s5p_device_ehci,
 	&smdkv210_ds18b20_device,
+	&s3c_device_fb,
+	&smdkv210_lcd_lte480wv,
 };
 
 static void __init smdkv210_map_io(void)
@@ -296,6 +320,88 @@ static struct i2c_board_info smdkv210_i2c_devs0[] __initdata = {
 
 static struct s5p_ehci_platdata smdkv210_ehci_pdata;
 
+static struct s3c_fb_pd_win smdkv210_fb_win0 = {
+	.win_mode = {
+		.left_margin	= 26,	//h_bp
+		.right_margin	= 210,//h_fp
+		.upper_margin	= 13,	//v_bp
+		.lower_margin	= 22,	//v_fp
+		.hsync_len	= 20,
+		.vsync_len	= 10,
+		.xres		= 800,
+		.yres		= 480,
+	},
+	.max_bpp	= 32,
+	.default_bpp	= 24,
+};
+static struct s3c_fb_pd_win smdkv210_fb_win1 = {
+	.win_mode = {
+		.left_margin	= 26,	//h_bp
+		.right_margin	= 210,//h_fp
+		.upper_margin	= 13,	//v_bp
+		.lower_margin	= 22,	//v_fp
+		.hsync_len	= 20,
+		.vsync_len	= 10,
+		.xres		= 800,
+		.yres		= 480,
+	},
+	.max_bpp	= 32,
+	.default_bpp	= 24,
+};
+static struct s3c_fb_pd_win smdkv210_fb_win2 = {
+	.win_mode = {
+		.left_margin	= 26,	//h_bp
+		.right_margin	= 210,//h_fp
+		.upper_margin	= 13,	//v_bp
+		.lower_margin	= 22,	//v_fp
+		.hsync_len	= 20,
+		.vsync_len	= 10,
+		.xres		= 800,
+		.yres		= 480,
+	},
+	.max_bpp	= 32,
+	.default_bpp	= 24,
+};
+static struct s3c_fb_pd_win smdkv210_fb_win3 = {
+	.win_mode = {
+		.left_margin	= 26,	//h_bp
+		.right_margin	= 210,//h_fp
+		.upper_margin	= 13,	//v_bp
+		.lower_margin	= 22,	//v_fp
+		.hsync_len	= 20,
+		.vsync_len	= 10,
+		.xres		= 800,
+		.yres		= 480,
+	},
+	.max_bpp	= 32,
+	.default_bpp	= 24,
+};
+static struct s3c_fb_pd_win smdkv210_fb_win4 = {
+	.win_mode = {
+		.left_margin	= 26,	//h_bp
+		.right_margin	= 210,//h_fp
+		.upper_margin	= 13,	//v_bp
+		.lower_margin	= 22,	//v_fp
+		.hsync_len	= 20,
+		.vsync_len	= 10,
+		.xres		= 800,
+		.yres		= 480,
+	},
+	.max_bpp	= 32,
+	.default_bpp	= 24,
+};
+
+static struct s3c_fb_platdata smdkv210_lcd0_pdata __initdata = {
+	.win[0]		= &smdkv210_fb_win0,
+	.win[1]		= &smdkv210_fb_win1,
+	.win[2]		= &smdkv210_fb_win2,
+	.win[3]		= &smdkv210_fb_win3,
+	.win[4]		= &smdkv210_fb_win4,
+	.vidcon0	= (4<<6)|(1<<4),//33.35MHz
+	.vidcon1	= (1<<6)|(1<<5),
+	.setup_gpio	= s5pv210_fb_gpio_setup_24bpp,
+};
+
 static void __init smdkv210_machine_init(void)
 {
 	smdkv210_dm9000_init();
@@ -304,6 +410,7 @@ static void __init smdkv210_machine_init(void)
 	i2c_register_board_info(0, smdkv210_i2c_devs0,
 			ARRAY_SIZE(smdkv210_i2c_devs0));
 	s5p_ehci_set_platdata(&smdkv210_ehci_pdata);
+	s3c_fb_set_platdata(&smdkv210_lcd0_pdata);
 	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
