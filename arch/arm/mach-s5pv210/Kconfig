@@ -152,6 +152,8 @@ config MACH_SMDKV210
 	select S5P_DEV_USB_EHCI
 	select S3C_DEV_FB
 	select S5PV210_SETUP_FB_24BPP
+	select SAMSUNG_DEV_BACKLIGHT
+	select SAMSUNG_DEV_PWM
 	help
 	  Machine support for Samsung SMDKV210
 

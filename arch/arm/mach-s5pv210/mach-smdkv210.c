@@ -249,11 +249,15 @@ static void smdkv210_lte480wv_set_power(struct plat_lcd_data *pd,
 					unsigned int power)
 {
 	if (power) {
+#if !defined(CONFIG_BACKLIGHT_PWM)
 		gpio_request_one(S5PV210_GPD0(0), GPIOF_OUT_INIT_HIGH, "GPD0");
 		gpio_free(S5PV210_GPD0(0));
+#endif
 	} else {
+#if !defined(CONFIG_BACKLIGHT_PWM)
 		gpio_request_one(S5PV210_GPD0(0), GPIOF_OUT_INIT_LOW, "GPD0");
 		gpio_free(S5PV210_GPD0(0));
+#endif
 	}
 }
 
@@ -402,6 +406,17 @@ static struct s3c_fb_platdata smdkv210_lcd0_pdata __initdata = {
 	.setup_gpio	= s5pv210_fb_gpio_setup_24bpp,
 };
 
+/* LCD Backlight data */
+static struct samsung_bl_gpio_info smdkv210_bl_gpio_info = {
+	.no = S5PV210_GPD0(0),
+	.func = S3C_GPIO_SFN(2),
+};
+
+static struct platform_pwm_backlight_data smdkv210_bl_data = {
+	.pwm_id = 0,
+	.pwm_period_ns	= 1000,
+};
+
 static void __init smdkv210_machine_init(void)
 {
 	smdkv210_dm9000_init();
@@ -411,6 +426,7 @@ static void __init smdkv210_machine_init(void)
 			ARRAY_SIZE(smdkv210_i2c_devs0));
 	s5p_ehci_set_platdata(&smdkv210_ehci_pdata);
 	s3c_fb_set_platdata(&smdkv210_lcd0_pdata);
+	samsung_bl_set(&smdkv210_bl_gpio_info, &smdkv210_bl_data);
 	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
