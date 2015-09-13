@@ -19,6 +19,8 @@
 #include <linux/gpio.h>
 #include <linux/delay.h>
 #include <linux/pwm_backlight.h>
+#include <linux/input.h>
+#include <linux/gpio_keys.h>
 
 #include <asm/hardware/vic.h>
 #include <asm/mach/arch.h>
@@ -129,10 +131,73 @@ static struct platform_device smdkv210_dm9000 = {
 	},
 };
 
+static struct gpio_keys_button gpio_buttons[] = {
+	{
+		.gpio		= S5PV210_GPH0(0),
+		.code		= KEY_UP,
+		.desc		= "up",
+		.active_low	= 1,
+	},
+	{
+		.gpio		= S5PV210_GPH0(1),
+		.code		= KEY_DOWN,
+		.desc		= "down",
+		.active_low	= 1,
+	},	
+	{
+		.gpio		= S5PV210_GPH0(2),
+		.code		= KEY_LEFT,
+		.desc		= "left",
+		.active_low	= 1,
+	},
+	{
+		.gpio		= S5PV210_GPH0(3),
+		.code		= KEY_RIGHT,
+		.desc		= "right",
+		.active_low	= 1,
+	},
+	{
+		.gpio		= S5PV210_GPH0(4),
+		.code		= KEY_ENTER,
+		.desc		= "enter",
+		.active_low	= 1,
+	},		
+	{
+		.gpio		= S5PV210_GPH0(5),
+		.code		= KEY_ESC,
+		.desc		= "esc",
+		.active_low	= 1,
+	},
+	{
+		.gpio		= S5PV210_GPH2(6),
+		.code		= KEY_VOLUMEUP,
+		.desc		= "vol+",
+		.active_low	= 1,
+	},
+	{
+		.gpio		= S5PV210_GPH2(7),
+		.code		= KEY_VOLUMEDOWN,
+		.desc		= "vol-",
+		.active_low	= 1,
+	},
+};
+static struct gpio_keys_platform_data gpio_button_data = {
+	.buttons	= gpio_buttons,
+	.nbuttons	= ARRAY_SIZE(gpio_buttons),
+};
+static struct platform_device s3c_device_gpio_button = {
+	.name		= "gpio-keys",
+	.id		= -1,
+	.dev		= {
+		.platform_data	= &gpio_button_data,
+	}
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
 	&s3c_device_i2c0,
+	&s3c_device_gpio_button,
 };
 
 static void __init smdkv210_map_io(void)
