@@ -22,6 +22,7 @@
 #include <linux/input.h>
 #include <linux/gpio_keys.h>
 #include <linux/leds.h>
+#include <linux/w1-gpio.h>
 
 #include <asm/hardware/vic.h>
 #include <asm/mach/arch.h>
@@ -223,6 +224,27 @@ static struct platform_device tq210_device_led= {
        },
 };
 
+/* DS18B20 */
+static void w1_enable_external_pullup(int enable)
+{
+	if (enable)
+		s3c_gpio_setpull(S5PV210_GPH1(0), S3C_GPIO_PULL_UP);
+	else
+		s3c_gpio_setpull(S5PV210_GPH1(0), S3C_GPIO_PULL_NONE);
+}
+static struct w1_gpio_platform_data ds18b20_w1_gpio = {
+	.pin = S5PV210_GPH1(0),
+	.is_open_drain = 0,
+	.enable_external_pullup = w1_enable_external_pullup,
+};
+static struct platform_device smdkv210_ds18b20_device = {
+        .name     = "w1-gpio",
+        .id       = -1,
+        .dev      = {
+			.platform_data  = &ds18b20_w1_gpio,
+        },
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
@@ -230,6 +252,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&s3c_device_gpio_button,
 	&tq210_device_led,
 	&s5p_device_ehci,
+	&smdkv210_ds18b20_device,
 };
 
 static void __init smdkv210_map_io(void)
