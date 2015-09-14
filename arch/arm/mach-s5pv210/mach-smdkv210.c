@@ -271,6 +271,16 @@ static struct platform_device smdkv210_lcd_lte480wv = {
 	.dev.platform_data	= &smdkv210_lcd_lte480wv_data,
 };
 
+/* Buzzer */
+static struct platform_device xc2440_beeper_device = {
+	.name		= "pwm-beeper",
+	.dev		= {
+		.parent 		= &s3c_device_timer[1].dev,
+		.platform_data 	= (void *)1,	//pwm通道
+	},
+	.id = 1,
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
@@ -281,6 +291,8 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_ds18b20_device,
 	&s3c_device_fb,
 	&smdkv210_lcd_lte480wv,
+	&s3c_device_timer[1],
+	&xc2440_beeper_device,
 };
 
 static void __init smdkv210_map_io(void)
@@ -417,6 +429,24 @@ static struct platform_pwm_backlight_data smdkv210_bl_data = {
 	.pwm_period_ns	= 1000,
 };
 
+static int __init smdkv210_pwm_beeper_init(void)
+{
+	int ret;
+
+	ret = gpio_request(S5PV210_GPD0(1), "beeper");
+	if (ret) {
+		printk(KERN_ERR "failed to request GPD for PWM-OUT 1\n");
+		return ret;
+	}
+
+	// Configure GPIO pin with S5PV210_GPD_0_1_TOUT_3 
+	s3c_gpio_cfgpin(S5PV210_GPD0(1), S3C_GPIO_SFN(2));
+
+	gpio_free(S5PV210_GPD0(1));
+
+	return 0;
+}
+
 static void __init smdkv210_machine_init(void)
 {
 	smdkv210_dm9000_init();
@@ -427,6 +457,7 @@ static void __init smdkv210_machine_init(void)
 	s5p_ehci_set_platdata(&smdkv210_ehci_pdata);
 	s3c_fb_set_platdata(&smdkv210_lcd0_pdata);
 	samsung_bl_set(&smdkv210_bl_gpio_info, &smdkv210_bl_data);
+	smdkv210_pwm_beeper_init();
 	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
