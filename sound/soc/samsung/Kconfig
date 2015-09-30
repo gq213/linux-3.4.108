@@ -34,6 +34,14 @@ config SND_SAMSUNG_SPDIF
 config SND_SAMSUNG_I2S
 	tristate
 
+config SND_S5PV2XX_SOC_WM8960
+	tristate "SoC I2S Audio support for WM8960 on TQ210"
+	depends on SND_SOC_SAMSUNG && (MACH_SMDK6410 || MACH_SMDKC100 || MACH_SMDK6440 || MACH_SMDK6450 || MACH_TQ210 || MACH_SMDKV210 || MACH_SMDKC110)
+	select SND_SOC_WM8960
+	select SND_SAMSUNG_I2S
+	help
+	  Say Y if you want to add support for SoC audio on the TQ210.
+
 config SND_SOC_SAMSUNG_NEO1973_WM8753
 	tristate "Audio support for Openmoko Neo1973 Smartphones (GTA01/GTA02)"
 	depends on SND_SOC_SAMSUNG && (MACH_NEO1973_GTA01 || MACH_NEO1973_GTA02)

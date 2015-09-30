@@ -940,6 +940,28 @@ static int wm8960_probe(struct snd_soc_codec *codec)
 	snd_soc_update_bits(codec, WM8960_LOUT2, 0x100, 0x100);
 	snd_soc_update_bits(codec, WM8960_ROUT2, 0x100, 0x100);
 
+#if 1
+/*
+WM8960_POWER2
+bit8,bit7,bit6,bit5
+WM8960_LDAC WM8960_RDAC
+WM8960_POWER3
+bit3,bit2
+WM8960_LOUTMIX WM8960_ROUTMIX
+bit8
+WM8960_LOUT1 WM8960_ROUT1	//headphone
+*/
+	/* other configuration */
+	snd_soc_update_bits(codec, WM8960_POWER2, 0x1e0, 0x1e0);	//0x1a
+	//snd_soc_update_bits(codec, WM8960_LDAC, 0x100, 0x100);	//0xa
+	//snd_soc_update_bits(codec, WM8960_RDAC, 0x100, 0x100);	//0xb
+	snd_soc_update_bits(codec, WM8960_POWER3, 0xc, 0xc);	//0x2f
+	snd_soc_update_bits(codec, WM8960_LOUTMIX, 0x100, 0x100);	//0x22
+	snd_soc_update_bits(codec, WM8960_ROUTMIX, 0x100, 0x100);	//0x25
+	snd_soc_update_bits(codec, WM8960_LOUT1, 0x5f, 0x5f);	//0x2
+	snd_soc_update_bits(codec, WM8960_ROUT1, 0x5f, 0x5f);	//0x3
+#endif
+
 	snd_soc_add_codec_controls(codec, wm8960_snd_controls,
 				     ARRAY_SIZE(wm8960_snd_controls));
 	wm8960_add_widgets(codec);

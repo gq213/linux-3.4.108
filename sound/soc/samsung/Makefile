@@ -43,6 +43,9 @@ snd-soc-tobermory-objs := tobermory.o
 snd-soc-lowland-objs := lowland.o
 snd-soc-littlemill-objs := littlemill.o
 
+snd-soc-tq210-wm8960-objs := tq210_wm8960.o
+obj-$(CONFIG_SND_S5PV2XX_SOC_WM8960) += snd-soc-tq210-wm8960.o
+
 obj-$(CONFIG_SND_SOC_SAMSUNG_JIVE_WM8750) += snd-soc-jive-wm8750.o
 obj-$(CONFIG_SND_SOC_SAMSUNG_NEO1973_WM8753) += snd-soc-neo1973-wm8753.o
 obj-$(CONFIG_SND_SOC_SAMSUNG_SMDK2443_WM9710) += snd-soc-smdk2443-wm9710.o

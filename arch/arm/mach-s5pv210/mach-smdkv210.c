@@ -281,6 +281,12 @@ static struct platform_device xc2440_beeper_device = {
 	.id = 1,
 };
 
+/* Audio device */
+static struct platform_device goni_device_audio = {
+	.name = "smdk-audio",
+	.id = -1,
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
@@ -293,6 +299,10 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_lcd_lte480wv,
 	&s3c_device_timer[1],
 	&xc2440_beeper_device,
+	&s5pv210_device_iis0,
+	&samsung_asoc_dma,
+	&samsung_asoc_idma,
+	&goni_device_audio,
 };
 
 static void __init smdkv210_map_io(void)
@@ -330,8 +340,18 @@ static struct s3c_sdhci_platdata smdkv210_hsmmc0_data __initdata = {
 	.cd_type		= S3C_SDHCI_CD_INTERNAL,
 };
 
+#include <sound/wm8960.h>
+static struct wm8960_data wm8960_pdata = {
+	.capless		= 0,
+	.dres			= WM8960_DRES_400R,
+};
+
 static struct i2c_board_info smdkv210_i2c_devs0[] __initdata = {
 	{ I2C_BOARD_INFO("24c02", 0x50), },
+	{
+		I2C_BOARD_INFO("wm8960", 0x1a),
+		.platform_data  = &wm8960_pdata,
+	},
 };
 
 static struct s5p_ehci_platdata smdkv210_ehci_pdata;
