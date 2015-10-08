@@ -19,12 +19,26 @@
 #include <linux/platform_device.h>
 #include <linux/pwm.h>
 #include <linux/slab.h>
+#include <plat/gpio-cfg.h>
+#include <linux/gpio.h>
 
 struct pwm_beeper {
 	struct input_dev *input;
 	struct pwm_device *pwm;
 	unsigned long period;
 };
+
+static void xc2440_beeper_enable(void)
+{
+    gpio_request(S5PV210_GPD0(1), "beeper");
+    s3c_gpio_setpull(S5PV210_GPD0(1), S3C_GPIO_PULL_NONE);
+    s3c_gpio_cfgpin(S5PV210_GPD0(1), S3C_GPIO_SFN(2));
+}
+
+static void xc2440_beeper_disable(void)
+{
+    s3c_gpio_cfgpin(S5PV210_GPD0(1), S3C_GPIO_INPUT);
+}
 
 #define HZ_TO_NANOSECONDS(x) (1000000000UL/(x))
 
@@ -49,9 +63,11 @@ static int pwm_beeper_event(struct input_dev *input,
 	}
 
 	if (value == 0) {
-		pwm_config(beeper->pwm, 0, 0);
+		//pwm_config(beeper->pwm, 0, 0);
 		pwm_disable(beeper->pwm);
+		xc2440_beeper_disable();
 	} else {
+		xc2440_beeper_enable();
 		period = HZ_TO_NANOSECONDS(value);
 		ret = pwm_config(beeper->pwm, period / 2, period);
 		if (ret)
