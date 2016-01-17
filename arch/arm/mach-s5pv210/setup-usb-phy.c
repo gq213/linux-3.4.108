@@ -95,11 +95,14 @@ static int exynos4210_usb_phy1_init(struct platform_device *pdev)
 		return err;
 	}
 
-	if (readl(S5PV210_USB_PHY_CON) & (0x1<<1)) {
+	/*if (readl(S5PV210_USB_PHY_CON) & (0x1<<1)) {
+		dev_err(&pdev->dev, "usb_phy1_init 0\n");
 		clk_disable(otg_clk);
 		clk_put(otg_clk);
 		return 0;
-	}
+	}*/
+
+	dev_err(&pdev->dev, "usb_phy1_init 1\n");
 
 	writel(readl(S5PV210_USB_PHY_CON) | (0x1<<1),
 		     S5PV210_USB_PHY_CON);
@@ -110,6 +113,7 @@ static int exynos4210_usb_phy1_init(struct platform_device *pdev)
 		     S3C_PHYCLK);
 	writel((readl(S3C_RSTCON)) | (0x1<<4) | (0x1<<3),
 		     S3C_RSTCON);
+	udelay(80);
 	writel(readl(S3C_RSTCON) & ~(0x1<<4) & ~(0x1<<3),
 		     S3C_RSTCON);
 	/* "at least 10uS" for PHY reset elsewhere, 20 not enough here... */
