@@ -179,15 +179,15 @@ static struct gpio_keys_button gpio_buttons[] = {
 	},
 	{
 		.gpio		= S5PV210_GPH2(6),
-		.code		= KEY_VOLUMEUP,
-		.desc		= "vol+",
+		.code		= KEY_HOME,
+		.desc		= "home",
 		.active_low	= 1,
 		.debounce_interval = 20,
 	},
 	{
 		.gpio		= S5PV210_GPH2(7),
-		.code		= KEY_VOLUMEDOWN,
-		.desc		= "vol-",
+		.code		= KEY_POWER,
+		.desc		= "power",
 		.active_low	= 1,
 		.debounce_interval = 20,
 	},
@@ -475,6 +475,13 @@ static int __init smdkv210_pwm_beeper_init(void)
 	return 0;
 }
 
+static void tq210_power_off(void)
+{
+	printk(KERN_ERR "Please turn off the switch!!!\n");
+
+	// todo pmic
+}
+
 static void __init smdkv210_machine_init(void)
 {
 	smdkv210_dm9000_init();
@@ -486,6 +493,8 @@ static void __init smdkv210_machine_init(void)
 	s3c_fb_set_platdata(&smdkv210_lcd0_pdata);
 	samsung_bl_set(&smdkv210_bl_gpio_info, &smdkv210_bl_data);
 	smdkv210_pwm_beeper_init();
+
+	pm_power_off = tq210_power_off;
 	
 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
 }
