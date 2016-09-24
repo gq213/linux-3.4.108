@@ -928,40 +928,45 @@ static int wm8960_probe(struct snd_soc_codec *codec)
 
 	wm8960->set_bias_level(codec, SND_SOC_BIAS_STANDBY);
 
-	/* Latch the update bits */
-	snd_soc_update_bits(codec, WM8960_LINVOL, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_RINVOL, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_LADC, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_RADC, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_LDAC, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_RDAC, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_LOUT1, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_ROUT1, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_LOUT2, 0x100, 0x100);
-	snd_soc_update_bits(codec, WM8960_ROUT2, 0x100, 0x100);
-
-#if 1
 /*
+// Left/Right Channel DAC Enable
 WM8960_POWER2
-bit8,bit7,bit6,bit5
+bit8,bit7
+
+// DAC Digital Volume Control
 WM8960_LDAC WM8960_RDAC
-WM8960_POWER3
-bit3,bit2
+
+######
+
+// DAC to Output Mixer (mute)
 WM8960_LOUTMIX WM8960_ROUTMIX
 bit8
-WM8960_LOUT1 WM8960_ROUT1	//headphone
+
+// Output Mixer Enable Control
+WM8960_POWER3
+bit3,bit2
+
+// Headphone Volume
+WM8960_LOUT1 WM8960_ROUT1
 bit[6:0]
+
+######
+
+// LOUT1/ROUT1 Output Enable
+WM8960_POWER2
+bit6,bit5
 */
-	/* other configuration */
-	snd_soc_update_bits(codec, WM8960_POWER2, 0x1e0, 0x1e0);	//0x1a
-	//snd_soc_update_bits(codec, WM8960_LDAC, 0x100, 0x100);	//0xa
-	//snd_soc_update_bits(codec, WM8960_RDAC, 0x100, 0x100);	//0xb
-	snd_soc_update_bits(codec, WM8960_POWER3, 0xc, 0xc);	//0x2f
+	snd_soc_update_bits(codec, WM8960_POWER2, 0x180, 0x180);	//0x1a
+	snd_soc_update_bits(codec, WM8960_LDAC, 0x100, 0x100);		//0xa
+	snd_soc_update_bits(codec, WM8960_RDAC, 0x100, 0x100);		//0xb
+
 	snd_soc_update_bits(codec, WM8960_LOUTMIX, 0x100, 0x100);	//0x22
 	snd_soc_update_bits(codec, WM8960_ROUTMIX, 0x100, 0x100);	//0x25
-	snd_soc_update_bits(codec, WM8960_LOUT1, 0x7f, 0x58);	//0x2
-	snd_soc_update_bits(codec, WM8960_ROUT1, 0x7f, 0x58);	//0x3
-#endif
+	snd_soc_update_bits(codec, WM8960_POWER3, 0xc, 0xc);		//0x2f
+	snd_soc_update_bits(codec, WM8960_LOUT1, 0x17f, 0x13f);		//0x2
+	snd_soc_update_bits(codec, WM8960_ROUT1, 0x17f, 0x13f);		//0x3
+
+	snd_soc_update_bits(codec, WM8960_POWER2, 0x180, 0x180);	//0x1a
 
 	snd_soc_add_codec_controls(codec, wm8960_snd_controls,
 				     ARRAY_SIZE(wm8960_snd_controls));
