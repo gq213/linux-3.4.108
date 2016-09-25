@@ -48,65 +48,53 @@ static int smdk_hw_params(struct snd_pcm_substream *substream,
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
 	struct snd_soc_dai *codec_dai = rtd->codec_dai;
-	unsigned int rclk, psr = 1;
-	int bfs, rfs, ret;
+	int bfs, rfs;
+	unsigned int rclk, psr;
+	int ret;
+
+	printk("%s(): format=%d, rate=%d\n", __FUNCTION__, params_format(params), params_rate(params));
 
 	switch (params_format(params)) {
-	case SNDRV_PCM_FORMAT_U24:
-	case SNDRV_PCM_FORMAT_S24:
-		bfs = 48;
+	case SNDRV_PCM_FORMAT_U8:
+	case SNDRV_PCM_FORMAT_S8:
+		bfs = 16;
+		rfs = 256;
 		break;
+
 	case SNDRV_PCM_FORMAT_U16_LE:
 	case SNDRV_PCM_FORMAT_S16_LE:
 		bfs = 32;
+		rfs = 512;
 		break;
+
+	case SNDRV_PCM_FORMAT_U24:
+	case SNDRV_PCM_FORMAT_S24:
+		bfs = 48;
+		rfs = 768;
+		break;
+
 	default:
+		printk(KERN_ERR "format Not yet supported!\n");
 		return -EINVAL;
 	}
 	
-	printk( "-%s(): format=%d bfs=%d\n", __FUNCTION__, params_format(params), bfs);
+	printk("%s(): bfs=%d, rfs=%d\n", __FUNCTION__, bfs, rfs);
 
-	/* The Fvco for WM8960 PLLs must fall within [90,100]MHz.
-	* This criterion can't be met if we request PLL output
-	* as {8000x256, 64000x256, 11025x256}Hz.
-	* As a wayout, we rather change rfs to a minimum value that
-	* results in (params_rate(params) * rfs), and itself, acceptable
-	* to both - the CODEC and the CPU.
+	/* 
+	case 32768000:
+	case 45158400:
+	case 49152000:
+	case 67737600:
+	case 73728000:
 	*/
-	switch (params_rate(params)) {
-	case 16000:
-	case 22050:
-	case 24000:
-	case 32000:
-	case 44100:
-	case 48000:
-	case 88200:
-	case 96000:
-		if (bfs == 48)
-			rfs = 384;
-		else
-			rfs = 256;
-		break;
-	case 64000:
-		rfs = 384;
-		break;
-	case 8000:
-	case 11025:
-	case 12000:
-		if (bfs == 48)
-			rfs = 768;
-		else
-			rfs = 512;
-			break;
-	default:
-		return -EINVAL;
-	}
-
-	printk( "-%s(): rate=%d rfs=%d\n", __FUNCTION__, params_rate(params), rfs);
-
 	rclk = params_rate(params) * rfs;
-
 	switch (rclk) {
+	case 2048000:
+	case 2822400:
+	case 3072000:
+		psr = 16;
+		break;
+
 	case 4096000:
 	case 5644800:
 	case 6144000:
@@ -114,6 +102,7 @@ static int smdk_hw_params(struct snd_pcm_substream *substream,
 	case 9216000:
 		psr = 8;
 		break;
+
 	case 8192000:
 	case 11289600:
 	case 12288000:
@@ -121,22 +110,29 @@ static int smdk_hw_params(struct snd_pcm_substream *substream,
 	case 18432000:
 		psr = 4;
 		break;
+
+	case 16384000:
 	case 22579200:
 	case 24576000:
 	case 33868800:
 	case 36864000:
 		psr = 2;
 		break;
+
+	case 32768000:
+	case 45158400:
+	case 49152000:
 	case 67737600:
 	case 73728000:
 		psr = 1;
 		break;
+
 	default:
-		printk(KERN_ERR "Not yet supported!\n");
+		printk(KERN_ERR "rclk=%d, Not yet supported!\n", rclk);
 		return -EINVAL;
 	}
 
-	printk( "-%s(): rclk=%d psr=%d\n", __FUNCTION__, rclk, psr);
+	printk("%s(): rclk=%d, psr=%d\n", __FUNCTION__, rclk, psr);
 
 	set_epll_rate(rclk * psr);
 

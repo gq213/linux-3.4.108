@@ -662,7 +662,7 @@ static int i2s_startup(struct snd_pcm_substream *substream,
 	struct i2s_dai *i2s = to_info(dai);
 	struct i2s_dai *other = i2s->pri_dai ? : i2s->sec_dai;
 	unsigned long flags;
-	u32 mod;
+	//u32 mod;
 
 	spin_lock_irqsave(&lock, flags);
 
@@ -678,12 +678,12 @@ static int i2s_startup(struct snd_pcm_substream *substream,
 
 	spin_unlock_irqrestore(&lock, flags);
 
-	//open clock
+	/*//open clock
 	mod = readl(i2s->addr + I2SMOD);
 	mod &= ~MOD_OPCLK_MASK;
 	mod |= MOD_OPCLK_PCLK;
 	writel(mod, i2s->addr + I2SMOD);
-	printk("+%s(): open OP_CLK\n", __FUNCTION__ );
+	printk("+%s(): open OP_CLK\n", __FUNCTION__ );*/
 
 	return 0;
 }
@@ -694,7 +694,7 @@ static void i2s_shutdown(struct snd_pcm_substream *substream,
 	struct i2s_dai *i2s = to_info(dai);
 	struct i2s_dai *other = i2s->pri_dai ? : i2s->sec_dai;
 	unsigned long flags;
-	u32 mod;
+	//u32 mod;
 
 	spin_lock_irqsave(&lock, flags);
 
@@ -715,12 +715,12 @@ static void i2s_shutdown(struct snd_pcm_substream *substream,
 		i2s_set_sysclk(dai, SAMSUNG_I2S_CDCLK,
 				0, SND_SOC_CLOCK_IN);
 
-	//close clock
+	/*//close clock
 	mod = readl(i2s->addr + I2SMOD);
 	mod &= ~MOD_OPCLK_MASK;
 	//mod |= MOD_OPCLK_PCLK;
 	writel(mod, i2s->addr + I2SMOD);
-	printk("+%s(): close OP_CLK\n", __FUNCTION__ );
+	printk("+%s(): close OP_CLK\n", __FUNCTION__ );*/
 }
 
 static int config_setup(struct i2s_dai *i2s)
@@ -918,6 +918,7 @@ static int samsung_i2s_dai_probe(struct snd_soc_dai *dai)
 {
 	struct i2s_dai *i2s = to_info(dai);
 	struct i2s_dai *other = i2s->pri_dai ? : i2s->sec_dai;
+	u32 mod;
 
 	printk("+%s()\n", __FUNCTION__ );
 
@@ -949,6 +950,13 @@ static int samsung_i2s_dai_probe(struct snd_soc_dai *dai)
 	if (i2s->quirks & QUIRK_SEC_DAI)
 		idma_reg_addr_init(i2s->addr,
 					i2s->sec_dai->idma_playback.dma_addr);
+
+	//open clock
+	mod = readl(i2s->addr + I2SMOD);
+	mod &= ~MOD_OPCLK_MASK;
+	mod |= MOD_OPCLK_PCLK;
+	writel(mod, i2s->addr + I2SMOD);
+	printk("+%s(): open OP_CLK\n", __FUNCTION__ );
 
 probe_exit:
 	/* Reset any constraint on RFS and BFS */
@@ -1013,7 +1021,7 @@ struct i2s_dai *i2s_alloc_dai(struct platform_device *pdev, bool sec)
 {
 	struct i2s_dai *i2s;
 
-	//printk("+%s()\n", __FUNCTION__ );
+	printk("+%s(bool=%d)\n", __FUNCTION__, sec);
 
 	i2s = devm_kzalloc(&pdev->dev, sizeof(struct i2s_dai), GFP_KERNEL);
 	if (i2s == NULL)

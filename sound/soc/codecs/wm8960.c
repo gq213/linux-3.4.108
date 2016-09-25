@@ -544,10 +544,16 @@ static int wm8960_mute(struct snd_soc_dai *dai, int mute)
 {
 	struct snd_soc_codec *codec = dai->codec;
 
-	if (mute)
+	if (mute) {
+		printk("+%s(): mute.\n", __FUNCTION__);
+
 		snd_soc_update_bits(codec, WM8960_DACCTL1, 0x8, 0x8);
-	else
+	}
+	else {
+		printk("+%s(): unmute.\n", __FUNCTION__);
+
 		snd_soc_update_bits(codec, WM8960_DACCTL1, 0x8, 0);
+	}
 	return 0;
 }
 
@@ -900,6 +906,8 @@ static int wm8960_probe(struct snd_soc_codec *codec)
 	struct wm8960_data *pdata = dev_get_platdata(codec->dev);
 	int ret;
 
+	printk("+%s(): init Headphone.\n", __FUNCTION__);
+
 	wm8960->set_bias_level = wm8960_set_bias_level_out3;
 
 	if (!pdata) {
@@ -963,10 +971,10 @@ bit6,bit5
 	snd_soc_update_bits(codec, WM8960_LOUTMIX, 0x100, 0x100);	//0x22
 	snd_soc_update_bits(codec, WM8960_ROUTMIX, 0x100, 0x100);	//0x25
 	snd_soc_update_bits(codec, WM8960_POWER3, 0xc, 0xc);		//0x2f
-	snd_soc_update_bits(codec, WM8960_LOUT1, 0x17f, 0x13f);		//0x2
-	snd_soc_update_bits(codec, WM8960_ROUT1, 0x17f, 0x13f);		//0x3
+	snd_soc_update_bits(codec, WM8960_LOUT1, 0x17f, 0x158);		//0x2 45%
+	snd_soc_update_bits(codec, WM8960_ROUT1, 0x17f, 0x158);		//0x3 45%
 
-	snd_soc_update_bits(codec, WM8960_POWER2, 0x180, 0x180);	//0x1a
+	//snd_soc_update_bits(codec, WM8960_POWER2, 0x60, 0x60);		//0x1a
 
 	snd_soc_add_codec_controls(codec, wm8960_snd_controls,
 				     ARRAY_SIZE(wm8960_snd_controls));
