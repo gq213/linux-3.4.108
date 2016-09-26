@@ -560,17 +560,23 @@ static int wm8960_mute(struct snd_soc_dai *dai, int mute)
 static int wm8960_set_bias_level_out3(struct snd_soc_codec *codec,
 				      enum snd_soc_bias_level level)
 {
+	printk("+%s(): %d.\n", __FUNCTION__, level);
+
 	switch (level) {
 	case SND_SOC_BIAS_ON:
+		printk("+%s(): ON.\n", __FUNCTION__);
 		break;
 
 	case SND_SOC_BIAS_PREPARE:
+		printk("+%s(): PREPARE.\n", __FUNCTION__);
 		/* Set VMID to 2x50k */
 		snd_soc_update_bits(codec, WM8960_POWER1, 0x180, 0x80);
 		break;
 
 	case SND_SOC_BIAS_STANDBY:
+		printk("+%s(): STANDBY.\n", __FUNCTION__);
 		if (codec->dapm.bias_level == SND_SOC_BIAS_OFF) {
+			printk("+%s(): OFF.\n", __FUNCTION__);
 			snd_soc_cache_sync(codec);
 
 			/* Enable anti-pop features */
@@ -595,6 +601,7 @@ static int wm8960_set_bias_level_out3(struct snd_soc_codec *codec,
 		break;
 
 	case SND_SOC_BIAS_OFF:
+		printk("+%s(): OFF.\n", __FUNCTION__);
 		/* Enable anti-pop features */
 		snd_soc_write(codec, WM8960_APOP1,
 			     WM8960_POBCTRL | WM8960_SOFT_ST |
@@ -964,13 +971,13 @@ bit[6:0]
 WM8960_POWER2
 bit6,bit5
 */
-	snd_soc_update_bits(codec, WM8960_POWER2, 0x180, 0x180);	//0x1a
+	//snd_soc_update_bits(codec, WM8960_POWER2, 0x180, 0x180);	//0x1a
 	snd_soc_update_bits(codec, WM8960_LDAC, 0x100, 0x100);		//0xa
 	snd_soc_update_bits(codec, WM8960_RDAC, 0x100, 0x100);		//0xb
 
 	snd_soc_update_bits(codec, WM8960_LOUTMIX, 0x100, 0x100);	//0x22
 	snd_soc_update_bits(codec, WM8960_ROUTMIX, 0x100, 0x100);	//0x25
-	snd_soc_update_bits(codec, WM8960_POWER3, 0xc, 0xc);		//0x2f
+	//snd_soc_update_bits(codec, WM8960_POWER3, 0xc, 0xc);		//0x2f
 	snd_soc_update_bits(codec, WM8960_LOUT1, 0x17f, 0x158);		//0x2 45%
 	snd_soc_update_bits(codec, WM8960_ROUT1, 0x17f, 0x158);		//0x3 45%
 
