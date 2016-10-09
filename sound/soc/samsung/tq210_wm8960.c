@@ -168,6 +168,12 @@ static int smdk_hw_params(struct snd_pcm_substream *substream,
 		return ret;
 	}
 
+	ret = snd_soc_dai_set_clkdiv(cpu_dai, SAMSUNG_I2S_DIV_PSR, psr);
+	if( ret < 0 ){
+		printk( "-%s(): AP PSR setting error, %d %d\n", __FUNCTION__, ret, psr);
+		return ret;
+	}
+
 	return 0;
 }
 

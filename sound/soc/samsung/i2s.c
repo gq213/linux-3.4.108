@@ -664,6 +664,8 @@ static int i2s_startup(struct snd_pcm_substream *substream,
 	unsigned long flags;
 	//u32 mod;
 
+	//printk("+%s()\n", __FUNCTION__ );
+
 	spin_lock_irqsave(&lock, flags);
 
 	i2s->mode |= DAI_OPENED;
@@ -695,6 +697,8 @@ static void i2s_shutdown(struct snd_pcm_substream *substream,
 	struct i2s_dai *other = i2s->pri_dai ? : i2s->sec_dai;
 	unsigned long flags;
 	//u32 mod;
+
+	//printk("+%s()\n", __FUNCTION__ );
 
 	spin_lock_irqsave(&lock, flags);
 
@@ -850,6 +854,9 @@ static int i2s_set_clkdiv(struct snd_soc_dai *dai,
 			return -EAGAIN;
 		}
 		i2s->bfs = div;
+		break;
+	case SAMSUNG_I2S_DIV_PSR:
+		writel(((div - 1) << 8) | PSR_PSREN, i2s->addr + I2SPSR);
 		break;
 	default:
 		dev_err(&i2s->pdev->dev,
