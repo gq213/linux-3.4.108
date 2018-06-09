@@ -3,12 +3,12 @@ for tq210
 
 编译内核
 cp bak.config .config
-make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- menuconfig
-make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- uImage
+make ARCH=arm CROSS_COMPILE=arm-buildroot-linux-gnueabihf- menuconfig
+make ARCH=arm CROSS_COMPILE=arm-buildroot-linux-gnueabihf- uImage
 
 编译模块
-make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- modules
-make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- modules_install INSTALL_MOD_PATH=/home/work/nfs/rootfs
+make ARCH=arm CROSS_COMPILE=arm-buildroot-linux-gnueabihf- modules
+make ARCH=arm CROSS_COMPILE=arm-buildroot-linux-gnueabihf- modules_install INSTALL_MOD_PATH=/mnt/qiang/work/210/nfs/rootfs
 
 清除
-make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- distclean
+make ARCH=arm CROSS_COMPILE=arm-buildroot-linux-gnueabihf- distclean

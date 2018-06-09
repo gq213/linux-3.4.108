@@ -19,6 +19,14 @@
 static void arch_detect_cpu(void)
 {
 	/* we do not need to do any cpu detection here at the moment. */
+	fifo_mask = S5PV210_UFSTAT_TXMASK;
+#if (CONFIG_S3C_LOWLEVEL_UART_PORT == 0)
+	fifo_max = 255 << S5PV210_UFSTAT_TXSHIFT;
+#elif (CONFIG_S3C_LOWLEVEL_UART_PORT == 1)
+	fifo_max = 63 << S5PV210_UFSTAT_TXSHIFT;
+#else
+	fifo_max = 15 << S5PV210_UFSTAT_TXSHIFT;
+#endif
 }
 
 #endif /* __ASM_ARCH_UNCOMPRESS_H */
