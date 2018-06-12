@@ -974,7 +974,7 @@ static int yaffs_setxattr(struct dentry *dentry, const char *name,
 	return error;
 }
 
-#ifdef YAFFS_NEW_XATTR
+#if (YAFFS_NEW_XATTR > 0)
 static ssize_t yaffs_getxattr(struct dentry * dentry, struct inode *inode,
 	const char *name, void *buff, size_t size)
 {
