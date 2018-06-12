@@ -158,4 +158,14 @@
 
 #define S5P_SZ_UART			SZ_256
 
+
+/* NAND */
+#define S5PV210_PA_NAND		(0xB0E00000)
+#define S5P_PA_NAND		S5PV210_PA_NAND
+
+#define S5PV210_SZ_NAND		SZ_1M
+#define S5P_SZ_NAND		S5PV210_SZ_NAND
+
+
+
 #endif /* __ASM_ARCH_MAP_H */

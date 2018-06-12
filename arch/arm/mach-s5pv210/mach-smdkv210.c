@@ -53,6 +53,9 @@
 #include <plat/mfc.h>
 #include <plat/sdhci.h>
 #include <plat/ehci.h>
+#include <linux/mtd/mtd.h>
+#include <linux/mtd/partitions.h>
+#include <plat/nand.h>
 
 #include "common.h"
 
@@ -295,6 +298,55 @@ static struct platform_device goni_device_audio = {
 	.id = -1,
 };
 
+/* NAND Controller */
+static struct resource s3c_nand_resource[] = {
+	[0] = {
+		.start	= S5P_PA_NAND,
+		.end	= S5P_PA_NAND + S5P_SZ_NAND - 1,
+		.flags	= IORESOURCE_MEM,
+	}
+};
+
+struct mtd_partition s3c_partition_info[] = {
+	{
+		.name		= "u-boot",
+		.offset		= (0),
+		.size		= (2*SZ_1M),
+		.mask_flags	= MTD_CAP_NANDFLASH,
+	},
+	{
+		.name		= "kernel",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= (10*SZ_1M),
+	},
+	{
+		.name		= "rootfs",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= (100*SZ_1M),
+	},
+	{
+		.name		= "userdata",
+		.offset		= MTDPART_OFS_APPEND,
+		.size		= MTDPART_SIZ_FULL,
+	}
+};
+
+struct s3c_nand_mtd_info s3c_nand_mtd_part_info = {
+	.chip_nr = 1,
+	.mtd_part_nr = ARRAY_SIZE(s3c_partition_info),
+	.partition = s3c_partition_info,
+};
+
+struct platform_device s3c_device_nand = {
+	.name		= "s5pv210-nand",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(s3c_nand_resource),
+	.resource	= s3c_nand_resource,
+	.dev		= {
+		.platform_data	= &s3c_nand_mtd_part_info,
+	},
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
@@ -311,6 +363,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&samsung_asoc_dma,
 	&samsung_asoc_idma,
 	&goni_device_audio,
+	&s3c_device_nand,
 };
 
 static void __init smdkv210_map_io(void)

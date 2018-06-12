@@ -499,7 +499,13 @@ static struct clk init_clocks_off[] = {
 		.parent		= &clk_p,
 		.enable		= s5pv210_clk_ip3_ctrl,
 		.ctrlbit	= (1 << 0),
-	},
+	},{
+		.name		= "nand",
+		.devname	= "s5pv210-nand",
+		.parent		= &clk_hclk_psys.clk,
+		.enable		= s5pv210_clk_ip1_ctrl,
+		.ctrlbit	=  ((1 << 28) | (1 << 24)),
+	}, 
 };
 
 static struct clk init_clocks[] = {
