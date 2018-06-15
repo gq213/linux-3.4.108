@@ -56,6 +56,7 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
 #include <plat/nand.h>
+#include <plat/hwmon.h>
 
 #include "common.h"
 
@@ -364,6 +365,8 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&samsung_asoc_idma,
 	&goni_device_audio,
 	&s3c_device_nand,
+	&s3c_device_adc,	
+	&s3c_device_hwmon,
 };
 
 static void __init smdkv210_map_io(void)
@@ -528,6 +531,40 @@ static int __init smdkv210_pwm_beeper_init(void)
 	return 0;
 }
 
+/* ADC */
+static struct s3c_hwmon_pdata xc2440_hwmon_info __initdata = {
+    .in[0] = &(struct s3c_hwmon_chcfg) {
+        .name        = "adc-ch0",
+        .mult        = 3300,
+        .div        = 4096,
+    },
+    .in[1] = &(struct s3c_hwmon_chcfg) {
+        .name        = "adc-ch1",
+        .mult        = 3300,
+        .div        = 4096,
+    },
+    .in[2] = &(struct s3c_hwmon_chcfg) {
+        .name        = "adc-ch2",
+        .mult        = 3300,
+        .div        = 4096,
+    },
+    .in[3] = &(struct s3c_hwmon_chcfg) {
+        .name        = "adc-ch3",
+        .mult        = 3300,
+        .div        = 4096,
+    },
+    .in[4] = &(struct s3c_hwmon_chcfg) {
+        .name        = "adc-ch4",
+        .mult        = 3300,
+        .div        = 4096,
+    },
+    .in[5] = &(struct s3c_hwmon_chcfg) {
+        .name        = "adc-ch5",
+        .mult        = 3300,
+        .div        = 4096,
+    },
+};
+
 static void tq210_power_off(void)
 {
 	printk(KERN_ERR "Please turn off the switch!!!\n");
@@ -546,6 +583,7 @@ static void __init smdkv210_machine_init(void)
 	s3c_fb_set_platdata(&smdkv210_lcd0_pdata);
 	samsung_bl_set(&smdkv210_bl_gpio_info, &smdkv210_bl_data);
 	smdkv210_pwm_beeper_init();
+	s3c_hwmon_set_platdata(&xc2440_hwmon_info);
 
 	pm_power_off = tq210_power_off;
 	
