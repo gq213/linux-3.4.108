@@ -92,6 +92,8 @@ static int ts_init_panel(struct i2c_client *client)
 }
 
 
+#define GOODIX_MULTI_TOUCH 0
+
 static void ts_work_func(struct work_struct* work)
 {
 	uint8_t point_data[36] = {0x07, 0x21, 0};
@@ -180,28 +182,35 @@ static void ts_work_func(struct work_struct* work)
                 input_w = point_data[offset+4];
             }
 			
-			if ((input_x > ts->abs_x_max) || (input_y > ts->abs_y_max)) {
-				 continue;
-			}
-			
-			input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_x);
-			input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_y);			
-			input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, input_w);
-			input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, input_w);
-			input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, point_index);
-			input_mt_sync(ts->input_dev);
+			swap(input_x, input_y);
 			
 			//printk("ID=%d, X=%d, Y=%d, W=%d\n", point_index, input_x, input_y, input_w);
+			
+			if ((input_x > ts->abs_x_max) || (input_y > ts->abs_y_max)) {
+				printk("ERROR: [%d, %d]-->[%d, %d]\n", input_x, input_y, ts->abs_x_max, ts->abs_y_max);
+				continue;
+			}
+
+#if GOODIX_MULTI_TOUCH			
+			;
+#else
+			if (i == 0) {
+				input_report_abs(ts->input_dev, ABS_X, input_x);
+				input_report_abs(ts->input_dev, ABS_Y, input_y);
+				input_report_key(ts->input_dev, BTN_TOUCH, 1);
+			}
+#endif
 		}
     } else {
-		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
-		input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0);
-		input_mt_sync(ts->input_dev);
-		
 		//printk("Touch Release!\n");
+		
+#if GOODIX_MULTI_TOUCH
+		;
+#else
+		input_report_key(ts->input_dev, BTN_TOUCH, 0);
+#endif
     }
 	
-    input_report_key(ts->input_dev, BTN_TOUCH, touch_num);
     input_sync(ts->input_dev);
 	
 reirq_enable:
@@ -223,8 +232,11 @@ static irqreturn_t ts_irq_handler(int irq, void *dev_id)
 static int init_input_dev(void)
 {
 	int ret;
-	uint16_t input_dev_x_max = ts->abs_x_max;
-    uint16_t input_dev_y_max = ts->abs_y_max;
+	
+    ts->abs_x_max = 480;
+    ts->abs_y_max = 800;
+	
+	swap(ts->abs_x_max, ts->abs_y_max);
 	
 	ts->input_dev = input_allocate_device();
 	if (!ts->input_dev) {
@@ -239,18 +251,16 @@ static int init_input_dev(void)
 	ts->input_dev->id.product = 0xBEEF;
 	ts->input_dev->id.version = 10427;	//screen firmware version	
 	
-	ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
+	ts->input_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
+	ts->input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y);
 	ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
-	ts->input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);
 	
-	input_set_abs_params(ts->input_dev, ABS_X, 0, input_dev_x_max, 0, 0);
-	input_set_abs_params(ts->input_dev, ABS_Y, 0, input_dev_y_max, 0, 0);
-	input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, input_dev_x_max, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, input_dev_y_max, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);	
-    input_set_abs_params(ts->input_dev, ABS_MT_TRACKING_ID, 0, TOUCH_N, 0, 0);
+#if GOODIX_MULTI_TOUCH
+    ;
+#else
+	input_set_abs_params(ts->input_dev, ABS_X, 0, ts->abs_x_max, 0, 0);
+	input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
+#endif
 	
 	ret = input_register_device(ts->input_dev);
 	if (ret) {
@@ -287,8 +297,6 @@ static int ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	}
 
 	ts->client = client;
-    ts->abs_x_max = 480;
-    ts->abs_y_max = 800;
 	
 	ret = init_input_dev();
 	if (ret < 0) {
