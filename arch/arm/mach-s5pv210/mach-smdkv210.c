@@ -352,6 +352,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&smdkv210_dm9000,
 	&s3c_device_hsmmc0,
 	&s3c_device_i2c0,
+	&s3c_device_i2c2,
 	&s3c_device_gpio_button,
 	&tq210_device_led,
 	&s5p_device_ehci,
@@ -565,6 +566,10 @@ static struct s3c_hwmon_pdata xc2440_hwmon_info __initdata = {
     },
 };
 
+static struct i2c_board_info smdkv210_i2c_devs2[] __initdata = {
+	{ I2C_BOARD_INFO("tq210-ts", 0x5d), },
+};
+
 static void tq210_power_off(void)
 {
 	printk(KERN_ERR "Please turn off the switch!!!\n");
@@ -579,6 +584,9 @@ static void __init smdkv210_machine_init(void)
 	s3c_i2c0_set_platdata(NULL);
 	i2c_register_board_info(0, smdkv210_i2c_devs0,
 			ARRAY_SIZE(smdkv210_i2c_devs0));
+	s3c_i2c2_set_platdata(NULL);
+	i2c_register_board_info(2, smdkv210_i2c_devs2,
+			ARRAY_SIZE(smdkv210_i2c_devs2));
 	s5p_ehci_set_platdata(&smdkv210_ehci_pdata);
 	s3c_fb_set_platdata(&smdkv210_lcd0_pdata);
 	samsung_bl_set(&smdkv210_bl_gpio_info, &smdkv210_bl_data);
